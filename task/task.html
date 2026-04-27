@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>4D Task Compass Pro · Auth + Email + Profile</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #eef2f7 0%, #dce4ec 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #1a2c3e;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* Auth Modal Styles */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .auth-modal {
+            background: white;
+            border-radius: 48px;
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            transition: 0.2s;
+        }
+
+        .auth-tab.active {
+            color: #1f6e4a;
+            border-bottom: 3px solid #1f6e4a;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .auth-form input {
+            padding: 0.9rem;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+        }
+
+        .auth-form button {
+            background: #1f6e4a;
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .profile-preview {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .profile-preview img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #1f6e4a;
+        }
+
+        /* Header with user info */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 60px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #1a4d6b, #2a8e6c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid #2a8e6c;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Email notification panel */
+        .email-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: white;
+        }
+
+        .email-panel button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .ref-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ref-card {
+            background: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .row-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.96);
+            border-radius: 28px;
+            box-shadow: 0 12px 28px -10px rgba(0,0,0,0.12);
+            flex: 1 1 300px;
+            padding: 1.4rem;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-left: 5px solid;
+            padding-left: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .card-plan h2 { border-color: #2c7da0; }
+        .card-done h2 { border-color: #2e9c6b; }
+        .card-gap h2 { border-color: #e67e22; }
+        .card-prior h2 { border-color: #8e44ad; }
+
+        .task-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .task-list li {
+            background: #f9fbfd;
+            margin: 0.5rem 0;
+            padding: 0.7rem 0.9rem;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e6edf4;
+        }
+
+        .btn-add {
+            background: #eef2f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 40px;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.8rem;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .primary-btn {
+            background: #1f6e4a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .secondary-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1f6e4a;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 30px;
+            z-index: 1100;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 800px) {
+            body { padding: 1rem; }
+            .card { flex: 1 1 100%; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- Auth Modal will be injected here if not logged in -->
+</div>
+
+<script>
+    // ---------- USER AUTH SYSTEM (localStorage based with profile image) ----------
+    let currentUser = null;
+    let users = [];
+
+    // Load users from localStorage
+    function loadUsers() {
+        const stored = localStorage.getItem('task_app_users');
+        if (stored) {
+            users = JSON.parse(stored);
+        } else {
+            // Demo user
+            users = [{
+                id: '1',
+                email: 'demo@example.com',
+                password: 'demo123',
+                name: 'Demo User',
+                profileImage: 'https://ui-avatars.com/api/?background=1f6e4a&color=fff&name=Demo'
+            }];
+            saveUsers();
+        }
+    }
+
+    function saveUsers() {
+        localStorage.setItem('task_app_users', JSON.stringify(users));
+    }
+
+    function saveCurrentUser() {
+        if (currentUser) {
+            localStorage.setItem('task_app_current_user', JSON.stringify(currentUser));
+        } else {
+            localStorage.removeItem('task_app_current_user');
+        }
+    }
+
+    function loadCurrentUser() {
+        const stored = localStorage.getItem('task_app_current_user');
+        if (stored) {
+            currentUser = JSON.parse(stored);
+            return true;
+        }
+        return false;
+    }
+
+    // Helper: show toast message
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.background = isError ? '#dc2626' : '#1f6e4a';
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Send email (simulated with mailto + console log, can integrate real SMTP via backend)
+    // For demo, uses mailto: or shows alert. To actually send, you'd need a backend API.
+    // Here we use a simulation that copies report and suggests email client.
+    function sendDailyReportEmail() {
+        if (!currentUser) return;
+        
+        const gaps = computeGaps();
+        const completionRate = plannedTasks.length === 0 ? 100 : ((plannedTasks.length - gaps.length) / plannedTasks.length * 100).toFixed(1);
+        
+        const subject = `[4D Task Report] ${new Date().toLocaleDateString()} - ${currentUser.name}`;
+        const body = `
+        📋 DAILY TASK REPORT
+        User: ${currentUser.name} (${currentUser.email})
+        Date: ${new Date().toLocaleString()}
+        
+        ✅ Planned Activities (${plannedTasks.length}):
+        ${plannedTasks.map(t => '- ' + t.text).join('\n') || 'None'}
+        
+        ✅ Completed Today (${doneTasks.length}):
+        ${doneTasks.map(t => '- ' + t.text).join('\n') || 'None'}
+        
+        ❌ NOT Done / Gaps (${gaps.length}):
+        ${gaps.map(g => '- ' + g.text).join('\n') || 'None - Great job!'}
+        
+        🎯 Priorities for Tomorrow:
+        ${generateSmartPriorities().map(p => '- ' + p.text).join('\n') || 'Generate priorities first'}
+        
+        📊 Completion Rate: ${completionRate}%
+        ${document.getElementById('gapReason') ? `\nGap Analysis: ${document.getElementById('gapReason').value}` : ''}
+        ${document.getElementById('emergingNotes') ? `\nEmerging Issues: ${document.getElementById('emergingNotes').value}` : ''}
+        `;
+        
+        // Simulate email - open default email client
+        const mailtoLink = `mailto:${currentUser.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.open(mailtoLink, '_blank');
+        showToast('📧 Email client opened. Send to yourself or team!', false);
+        
+        // Also store in localStorage for history
+        const reportHistory = JSON.parse(localStorage.getItem('task_email_history') || '[]');
+        reportHistory.push({ date: new Date().toISOString(), subject, bodyPreview: body.substring(0, 100) });
+        localStorage.setItem('task_email_history', JSON.stringify(reportHistory));
+    }
+
+    // ---------- TASK MANAGEMENT (same as before, integrated with user) ----------
+    let plannedTasks = [];
+    let doneTasks = [];
+    let customPriorities = [];
+
+    function loadUserData() {
+        if (!currentUser) return;
+        const key = `tasks_${currentUser.id}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+            const data = JSON.parse(saved);
+            plannedTasks = data.plannedTasks || [];
+            doneTasks = data.doneTasks || [];
+            customPriorities = data.customPriorities || [];
+        } else {
+            // Default demo tasks for new user
+            plannedTasks = [
+                { id: Date.now() + '1', text: 'Review project roadmap' },
+                { id: Date.now() + '2', text: 'Complete daily standup notes' },
+                { id: Date.now() + '3', text: 'Update task documentation' }
+            ];
+            doneTasks = [
+                { id: Date.now() + '4', text: 'Review project roadmap' }
+            ];
+            customPriorities = [];
+        }
+        renderAll();
+    }
+
+    function saveUserData() {
+        if (!currentUser) return;
+        const key = `tasks_${currentUser.id}`;
+        const data = { plannedTasks, doneTasks, customPriorities };
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    function uid() { return Date.now() + '-' + Math.random().toString(36).substr(2, 6); }
+
+    function computeGaps() {
+        const doneSet = new Set(doneTasks.map(t => t.text.trim().toLowerCase()));
+        return plannedTasks.filter(p => !doneSet.has(p.text.trim().toLowerCase()));
+    }
+
+    function getUnplannedCount() {
+        const plannedSet = new Set(plannedTasks.map(p => p.text.trim().toLowerCase()));
+        return doneTasks.filter(d => !plannedSet.has(d.text.trim().toLowerCase())).length;
+    }
+
+    function generateSmartPriorities() {
+        const gaps = computeGaps();
+        let base = [...customPriorities.map(p => ({ id: p.id, text: p.text, source: 'custom' }))];
+        for (let gap of gaps) {
+            if (!base.some(b => b.text.trim().toLowerCase() === gap.text.trim().toLowerCase())) {
+                base.push({ id: uid(), text: gap.text, source: 'gap' });
+            }
+        }
+        const emergingNote = document.getElementById('emergingNotes')?.value || '';
+        if (emergingNote.length > 5) {
+            const emergingTask = `⚡ ${emergingNote.substring(0, 60)}`;
+            if (!base.some(b => b.text.includes(emergingTask.substring(0, 30)))) {
+                base.unshift({ id: uid(), text: emergingTask, source: 'emerging' });
+            }
+        }
+        const seen = new Set();
+        return base.filter(p => {
+            const key = p.text.trim().toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
+    function renderAll() {
+        if (!currentUser) return;
+        renderPlanned();
+        renderDone();
+        renderGaps();
+        renderTomorrow();
+        updateStats();
+        saveUserData();
+    }
+
+    function renderPlanned() {
+        const container = document.getElementById('plannedList');
+        if (!container) return;
+        if (plannedTasks.length === 0) container.innerHTML = '<li>📭 No planned tasks</li>';
+        else {
+            container.innerHTML = plannedTasks.map(t => `
+                <li><span class="task-text">📌 ${escapeHtml(t.text)}</span>
+                <button class="btn-icon" data-id="${t.id}" data-action="delete-planned">🗑️</button></li>
+            `).join('');
+        }
+        document.querySelectorAll('[data-action="delete-planned"]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                plannedTasks = plannedTasks.filter(t => t.id !== id);
+                renderAll();
+            });
+        });
+        document.getElementById('plannedCount') && (document.getElementById('plannedCount').innerText = plannedTasks.length);
+    }
+
+    function renderDone() {
+        const container = document.getElementById('doneList');
+        if (!container) return;
+        const plannedSet = new Set(plannedTasks.map(p => p.text.trim().toLowerCase()));
+        if (doneTasks.length === 0) container.innerHTML = '<li>📝 No completed tasks</li>';
+        else {
+            container.innerHTML = doneTasks.map(t => `
+                <li><span class="task-text">✅ ${escapeHtml(t.text)} ${!plannedSet.has(t.text.trim().toLowerCase()) ? '<span style="background:#ffe0b5;padding:2px 8px;border-radius:20px;font-size:11px;">unplanned</span>' : ''}</span>
+                <button class="btn-icon" data-id="${t.id}" data-action="delete-done">✖️</button></li>
+            `).join('');
+        }
+        document.querySelectorAll('[data-action="delete-done"]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                doneTasks = doneTasks.filter(t => t.id !== id);
+                renderAll();
+            });
+        });
+        document.getElementById('doneCount') && (document.getElementById('doneCount').innerText = doneTasks.length);
+        document.getElementById('unplannedCount') && (document.getElementById('unplannedCount').innerText = getUnplannedCount());
+    }
+
+    function renderGaps() {
+        const gaps = computeGaps();
+        const container = document.getElementById('gapList');
+        if (!container) return;
+        if (gaps.length === 0) container.innerHTML = '<li>🎉 No gaps! Perfect alignment.</li>';
+        else {
+            container.innerHTML = gaps.map(g => `
+                <li style="background:#fff2e6;"><span class="task-text">❌ ${escapeHtml(g.text)}</span>
+                <button class="btn-icon quick-move" data-gap="${escapeHtml(g.text)}">➕ Move to Done</button></li>
+            `).join('');
+        }
+        document.querySelectorAll('.quick-move').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const gapText = btn.getAttribute('data-gap');
+                if (gapText && !doneTasks.some(d => d.text === gapText)) {
+                    doneTasks.push({ id: uid(), text: gapText });
+                    renderAll();
+                }
+            });
+        });
+    }
+
+    function renderTomorrow() {
+        const priorities = generateSmartPriorities();
+        const container = document.getElementById('tomorrowList');
+        if (!container) return;
+        if (priorities.length === 0) container.innerHTML = '<li>✨ Generate priorities</li>';
+        else {
+            container.innerHTML = priorities.map(p => `
+                <li><span class="task-text">🔹 ${escapeHtml(p.text)} ${p.source === 'gap' ? '<span style="font-size:10px;background:#eee;padding:2px 6px;border-radius:12px;">gap</span>' : (p.source === 'emerging' ? '<span style="background:#ffd966;padding:2px 6px;border-radius:12px;">emerging</span>' : '')}</span>
+                <button class="btn-icon" data-pri-id="${p.id}" data-action="delete-priority">🗑️</button></li>
+            `).join('');
+        }
+        document.querySelectorAll('[data-action="delete-priority"]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const priId = btn.getAttribute('data-pri-id');
+                const customIdx = customPriorities.findIndex(c => c.id === priId);
+                if (customIdx !== -1) customPriorities.splice(customIdx, 1);
+                else alert('Auto-generated — regenerate to update');
+                renderAll();
+            });
+        });
+    }
+
+    function updateStats() {
+        const gaps = computeGaps();
+        const rate = plannedTasks.length === 0 ? 100 : ((plannedTasks.length - gaps.length) / plannedTasks.length * 100).toFixed(1);
+        document.getElementById('completionRate') && (document.getElementById('completionRate').innerText = `${rate}%`);
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
+
+    // Profile image upload
+    function updateProfileImage(file, callback) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgData = e.target.result;
+            currentUser.profileImage = imgData;
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) users[userIndex].profileImage = imgData;
+            saveUsers();
+            saveCurrentUser();
+            updateHeaderUI();
+            callback && callback();
+            showToast('Profile image updated!');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function updateHeaderUI() {
+        const headerDiv = document.getElementById('userHeader');
+        if (headerDiv && currentUser) {
+            headerDiv.innerHTML = `
+                <div class="logo"><h1>🔄 4D Task Compass</h1></div>
+                <div class="user-info">
+                    <label for="profileUpload" style="cursor:pointer;">
+                        <img src="${currentUser.profileImage || 'https://ui-avatars.com/api/?background=1f6e4a&color=fff&name=' + encodeURIComponent(currentUser.name)}" class="user-avatar" id="userAvatar">
+                    </label>
+                    <input type="file" id="profileUpload" accept="image/*" style="display:none">
+                    <span style="font-weight:500;">${currentUser.name}</span>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            `;
+            document.getElementById('profileUpload')?.addEventListener('change', (e) => {
+                if (e.target.files[0]) updateProfileImage(e.target.files[0], () => updateHeaderUI());
+            });
+            document.getElementById('logoutBtn')?.addEventListener('click', logout);
+        }
+    }
+
+    // Auth UI
+    function showAuthModal() {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div class="auth-overlay">
+                <div class="auth-modal">
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" data-tab="login">Login</div>
+                        <div class="auth-tab" data-tab="register">Register</div>
+                    </div>
+                    <div id="authFormContainer"></div>
+                </div>
+            </div>
+        `;
+        function renderForm(type) {
+            const container = document.getElementById('authFormContainer');
+            if (type === 'login') {
+                container.innerHTML = `
+                    <div class="auth-form">
+                        <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+                        <input type="password" id="loginPassword" placeholder="Password">
+                        <button id="loginBtn">Sign In</button>
+                    </div>
+                `;
+                document.getElementById('loginBtn')?.addEventListener('click', () => {
+                    const email = document.getElementById('loginEmail').value;
+                    const pwd = document.getElementById('loginPassword').value;
+                    const user = users.find(u => u.email === email && u.password === pwd);
+                    if (user) {
+                        currentUser = { ...user };
+                        saveCurrentUser();
+                        initApp();
+                        showToast(`Welcome back, ${user.name}!`);
+                    } else showToast('Invalid credentials', true);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="auth-form">
+                        <div class="profile-preview"><img id="registerPreview" src="https://ui-avatars.com/api/?background=1f6e4a&color=fff&name=User"></div>
+                        <input type="text" id="regName" placeholder="Full Name">
+                        <input type="email" id="regEmail" placeholder="Email">
+                        <input type="password" id="regPassword" placeholder="Password">
+                        <input type="file" id="regAvatar" accept="image/*">
+                        <button id="registerBtn">Create Account</button>
+                    </div>
+                `;
+                document.getElementById('regAvatar')?.addEventListener('change', (e) => {
+                    if (e.target.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { document.getElementById('registerPreview').src = ev.target.result; };
+                        reader.readAsDataURL(e.target.files[0]);
+                    }
+                });
+                document.getElementById('registerBtn')?.addEventListener('click', () => {
+                    const name = document.getElementById('regName').value;
+                    const email = document.getElementById('regEmail').value;
+                    const pwd = document.getElementById('regPassword').value;
+                    const avatarFile = document.getElementById('regAvatar').files[0];
+                    if (!name || !email || !pwd) { showToast('All fields required', true); return; }
+                    if (users.find(u => u.email === email)) { showToast('Email already exists', true); return; }
+                    const newUser = { id: Date.now().toString(), email, password: pwd, name, profileImage: 'https://ui-avatars.com/api/?background=1f6e4a&color=fff&name=' + encodeURIComponent(name) };
+                    if (avatarFile) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            newUser.profileImage = e.target.result;
+                            users.push(newUser);
+                            saveUsers();
+                            currentUser = newUser;
+                            saveCurrentUser();
+                            initApp();
+                            showToast('Account created! Welcome!');
+                        };
+                        reader.readAsDataURL(avatarFile);
+                    } else {
+                        users.push(newUser);
+                        saveUsers();
+                        currentUser = newUser;
+                        saveCurrentUser();
+                        initApp();
+                        showToast('Account created!');
+                    }
+                });
+            }
+        }
+        renderForm('login');
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                renderForm(tab.getAttribute('data-tab'));
+            });
+        });
+    }
+
+    function logout() {
+        currentUser = null;
+        saveCurrentUser();
+        showAuthModal();
+    }
+
+    function initApp() {
+        if (!currentUser) { showAuthModal(); return; }
+        loadUserData();
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div class="container">
+                <div id="userHeader" class="header"></div>
+                <div class="email-panel">
+                    <span>📧 Send daily report to your email</span>
+                    <button id="sendEmailReportBtn">Send Report via Email</button>
+                </div>
+                <div class="ref-grid">
+                    <span class="ref-card">❶ Planned</span>
+                    <span class="ref-card">❷ Completed</span>
+                    <span class="ref-card">❸ Gaps</span>
+                    <span class="ref-card">❹ Tomorrow</span>
+                </div>
+                <div class="dashboard">
+                    <div class="row-cards">
+                        <div class="card card-plan"><h2>📋 Planned Activities</h2><ul id="plannedList" class="task-list"></ul><button class="btn-add" id="addPlannedBtn">+ Add</button><input type="text" id="newPlannedInput" style="display:none;"></div>
+                        <div class="card card-done"><h2>✅ Completed Today</h2><ul id="doneList" class="task-list"></ul><button class="btn-add" id="addDoneBtn">+ Log</button><input type="text" id="newDoneInput" style="display:none;"><div class="stats">Completed: <span id="doneCount">0</span> | Unplanned: <span id="unplannedCount">0</span></div></div>
+                        <div class="card card-gap"><h2>⚠️ NOT Done</h2><ul id="gapList" class="task-list"></ul><textarea id="gapReason" rows="2" placeholder="Why left out?"></textarea></div>
+                    </div>
+                    <div class="row-cards">
+                        <div class="card card-prior"><h2>🎯 Tomorrow's Priorities</h2><ul id="tomorrowList" class="task-list"></ul><button class="btn-add" id="addPriorityBtn">+ Manual</button><input type="text" id="newPriorityInput" style="display:none;"><div class="action-bar"><button id="autoGenBtn" class="primary-btn">✨ Auto-generate</button><button id="copyPlanBtn" class="secondary-btn">Copy to Plan</button></div></div>
+                        <div class="card"><h2>📊 Emerging Issues</h2><textarea id="emergingNotes" rows="3" placeholder="Emerging interruptions / valuable pivots..."></textarea><div class="stats">Completion: <strong id="completionRate">0%</strong></div></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        updateHeaderUI();
+        attachTaskHandlers();
+        renderAll();
+        document.getElementById('sendEmailReportBtn')?.addEventListener('click', sendDailyReportEmail);
+        document.getElementById('autoGenBtn')?.addEventListener('click', () => renderAll());
+        document.getElementById('copyPlanBtn')?.addEventListener('click', () => {
+            const priorities = generateSmartPriorities();
+            for (let p of priorities) {
+                if (!plannedTasks.some(pt => pt.text === p.text)) plannedTasks.push({ id: uid(), text: p.text });
+            }
+            renderAll();
+        });
+    }
+
+    function attachTaskHandlers() {
+        const addPlanned = () => { const i = document.getElementById('newPlannedInput'); i.style.display = 'block'; i.focus(); const handler = () => { if (i.value.trim()) { plannedTasks.push({ id: uid(), text: i.value.trim() }); i.value = ''; i.style.display = 'none'; renderAll(); } else i.style.display = 'none'; i.removeEventListener('blur', handler); }; i.addEventListener('blur', handler); };
+        const addDone = () => { const i = document.getElementById('newDoneInput'); i.style.display = 'block'; i.focus(); const handler = () => { if (i.value.trim()) { doneTasks.push({ id: uid(), text: i.value.trim() }); i.value = ''; i.style.display = 'none'; renderAll(); } else i.style.display = 'none'; i.removeEventListener('blur', handler); }; i.addEventListener('blur', handler); };
+        const addPriority = () => { const i = document.getElementById('newPriorityInput'); i.style.display = 'block'; i.focus(); const handler = () => { if (i.value.trim()) { customPriorities.push({ id: uid(), text: i.value.trim() }); i.value = ''; i.style.display = 'none'; renderAll(); } else i.style.display = 'none'; i.removeEventListener('blur', handler); }; i.addEventListener('blur', handler); };
+        document.getElementById('addPlannedBtn')?.addEventListener('click', addPlanned);
+        document.getElementById('addDoneBtn')?.addEventListener('click', addDone);
+        document.getElementById('addPriorityBtn')?.addEventListener('click', addPriority);
+    }
+
+    loadUsers();
+    if (!loadCurrentUser()) showAuthModal();
+    else initApp();
+</script>
+</body>
+</html>
